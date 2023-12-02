@@ -125,7 +125,7 @@
                                 <tr>
                                     <td class="text-start text-sm"> <?= $no; ?> </td>
                                     <td class="text-start text-sm"> <?= $packageName; ?></td>
-                                    <td class="text-start text-sm"> <?= $requestDate; ?> </td>
+                                    <td class="text-start text-sm"> <?= $request_date; ?> </td>
                                     <td class="text-start text-sm" style="min-width: 250px;">
                                         <a class="btn  btn-sm text-sm">
                                             <?= $reservationIdStatus == 1  ?  '<i class="fa fa-check-circle text-primary" aria-hidden="true"></i>' : '' ?>
