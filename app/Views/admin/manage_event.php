@@ -16,7 +16,7 @@
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <table class="table table-border" id="dataTable" width="100%" cellspacing="0">
                     <thead>
                         <?php $no = 1;
 
@@ -71,4 +71,9 @@
 
 </div>
 <!-- /.container-fluid -->
+<?= $this->endSection() ?>
+<?= $this->section('script') ?>
+<script>
+    new DataTable("#dataTable")
+</script>
 <?= $this->endSection() ?>

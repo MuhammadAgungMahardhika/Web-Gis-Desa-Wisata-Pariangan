@@ -59,10 +59,10 @@ class packageDayModel extends Model
         $lastId = $this->db->table($this->table)->select('day')->orderBy('day', 'ASC')->get()->getLastRow('array');
         if ($lastId != null) {
             $count = (int)substr($lastId['day'], 0);
-            $id = sprintf('%01d', $count + 1);
+            $id = sprintf('%02d', $count + 1);
         } else {
             $count = 0;
-            $id = sprintf('%01d', $count + 1);
+            $id = sprintf('%02d', $count + 1);
         }
         return $id;
     }

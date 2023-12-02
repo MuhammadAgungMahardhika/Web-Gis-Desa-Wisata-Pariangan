@@ -10,14 +10,7 @@ class packageModel extends Model
 {
     protected $table = 'package';
 
-    protected $columns = '
-    package.id,
-    package.name,
-    package.capacity,
-    package.price,
-    package.cp,
-    package.url,
-    package.description';
+    protected $columns = "*";
 
 
     public function get_new_id()
@@ -31,11 +24,20 @@ class packageModel extends Model
             return '01';
         }
     }
-    public function getPackages()
+
+
+    public function getPackages($withCostume = null)
     {
-        $query = $this->db->table($this->table)
-            ->select("{$this->columns}")
-            ->get()->getResult();
+        if ($withCostume == null) {
+            $query = $this->db->table($this->table)
+                ->select("{$this->columns}")
+                ->where('package.costum !=', '1')
+                ->get()->getResult();
+        } else {
+            $query = $this->db->table($this->table)
+                ->select("{$this->columns}")
+                ->get()->getResult();
+        }
         return $query;
     }
     public function getPackage($id)

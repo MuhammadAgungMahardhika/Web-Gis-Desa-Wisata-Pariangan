@@ -9,9 +9,64 @@ use CodeIgniter\I18n\Time;
 class parianganModel extends Model
 {
     protected $table = 'pariangan';
+    protected $tableCountry = 'country';
+    protected $tableProvince = 'province';
+    protected $tableCity = 'city';
+    protected $tableSubDistrict = 'subdistric';
     protected $table_gallery = 'pariangan_gallery';
     protected $primaryKey = 'id';
     protected $allowedFields = ['name', 'type_of_tourism', 'address', 'contact_person', 'description', 'lat', 'lng', 'geom'];
+
+    public function getCountry()
+    {
+
+        $geom_area = "ST_AsGeoJSON({$this->tableCountry}.geom_area) AS geoJSON";
+        $columns = "
+        {$this->tableCountry}.id,
+        {$this->tableCountry}.name";
+
+        $query = $this->db->table($this->tableCountry)
+            ->select("{$columns},{$geom_area}")
+            ->get()->getRow();
+        return $query;
+    }
+    public function getProvince()
+    {
+
+        $geom_area = "ST_AsGeoJSON({$this->tableProvince}.geom_area) AS geoJSON";
+        $columns = "
+        {$this->tableProvince}.id,
+        {$this->tableProvince}.name";
+
+        $query = $this->db->table($this->tableProvince)
+            ->select("{$columns},{$geom_area}")
+            ->get()->getRow();
+        return $query;
+    }
+    public function getCity()
+    {
+        $geom_area = "ST_AsGeoJSON({$this->tableCity}.geom_area) AS geoJSON";
+        $columns = "
+        {$this->tableCity}.id,
+        {$this->tableCity}.name";
+
+        $query = $this->db->table($this->tableCity)
+            ->select("{$columns},{$geom_area}")
+            ->get()->getRow();
+        return $query;
+    }
+    public function getSubDistrict()
+    {
+        $geom_area = "ST_AsGeoJSON({$this->tableSubDistrict}.geom_area) AS geoJSON";
+        $columns = "
+        {$this->tableSubDistrict}.id,
+        {$this->tableSubDistrict}.name";
+
+        $query = $this->db->table($this->tableSubDistrict)
+            ->select("{$columns},{$geom_area}")
+            ->get()->getRow();
+        return $query;
+    }
     public function getPariangan()
     {
         $coords = "ST_Y({$this->table}.geom) AS lat ,ST_X({$this->table}.geom) AS lng ";

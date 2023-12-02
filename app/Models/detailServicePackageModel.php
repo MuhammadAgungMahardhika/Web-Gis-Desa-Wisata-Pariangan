@@ -30,6 +30,17 @@ class detailServicePackageModel extends Model
         $query = $this->db->table($this->table)
             ->select('service_package.id, service_package.name')
             ->where('id_package', $package_id)
+            ->where('status', 'include')
+            ->join('service_package', 'detail_service_package.id_service_package = service_package.id')
+            ->get();
+        return $query;
+    }
+    public function get_service_by_package_api_exclude($package_id = null)
+    {
+        $query = $this->db->table($this->table)
+            ->select('service_package.id, service_package.name')
+            ->where('id_package', $package_id)
+            ->where('status', 'exclude')
             ->join('service_package', 'detail_service_package.id_service_package = service_package.id')
             ->get();
         return $query;
@@ -59,24 +70,27 @@ class detailServicePackageModel extends Model
         return $id;
     }
 
-    public function add_service_api($id = null, $data = null)
+    public function add_service_api($id = null, $data = null, $status = null)
     {
         $query = false;
         foreach ($data as $service) {
 
             $content = [
                 'id_package' => $id,
-                'id_service_package' => $service
+                'id_service_package' => $service,
+                'status' => $status
             ];
             $query = $this->db->table($this->table)->insert($content);
         }
         return $query;
     }
 
-    public function update_service_api($id = null, $data = null)
+    public function update_service_api($id = null, $data = null, $status = null)
     {
-        $queryDel = $this->db->table($this->table)->delete(['id_package' => $id]);
-        $queryIns = $this->add_service_api($id, $data);
+        foreach ($data as $service) {
+            $queryDel = $this->db->table($this->table)->where('id_service_package', $service)->delete(['id_package' => $id]);
+        }
+        $queryIns = $this->add_service_api($id, $data, $status);
         return $queryDel && $queryIns;
     }
     public function delete_service_api($id_package)

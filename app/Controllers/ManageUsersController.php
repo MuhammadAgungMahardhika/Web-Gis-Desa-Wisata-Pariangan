@@ -5,7 +5,7 @@ namespace App\Controllers;
 class ManageUsersController extends BaseController
 {
     protected $model, $validation;
-    protected $title = 'Manage-Users | Tourism Village';
+    protected $title = 'Manage-Users-Admins | Tourism Village';
     public function __construct()
     {
         $this->validation = \Config\Services::validation();
@@ -19,11 +19,24 @@ class ManageUsersController extends BaseController
         $data = [
             'title' => $this->title,
             'config' => config('Auth'),
+            'listTitle' => 'Users',
             'users' => $usersData
         ];
         return view('admin/manage_users', $data);
     }
 
+    //  Display  All Admin
+    public function admin()
+    {
+        $usersData = $this->model->getAdmins();
+        $data = [
+            'title' => $this->title,
+            'config' => config('Auth'),
+            'listTitle' => 'Admins',
+            'users' => $usersData
+        ];
+        return view('admin/manage_users', $data);
+    }
     // Display user detail
     public function detail($id = 0)
     {

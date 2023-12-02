@@ -39,6 +39,12 @@
                                     </div>
                                 </div>
                                 <div class="form-group">
+                                    <label for="price" class=" col col-form-label">Price</label>
+                                    <div class="col">
+                                        <input type="text" class="form-control" name="price" required autocomplete="off">
+                                    </div>
+                                </div>
+                                <div class="form-group">
                                     <label for="area_size" class=" col col-form-label">Area size</label>
                                     <div class="col">
                                         <input type="number" class="form-control" name="area_size" autocomplete="off">
@@ -109,11 +115,14 @@
                                 </tr>
                                 <tr>
                                     <td>Latitude</td>
-                                    <td colspan="2"><input type="text" class="form-control" id="latitude" name="latitude" autocomplete="off" readonly="readonly" required></td>
+                                    <td colspan="2"><input type="text" class="form-control" id="latitude" name="latitude" autocomplete="off" required></td>
+                                    <td>
+                                        <a onclick="searchLatLang('<?= $url ?>')" data-bs-toggle="tooltip" data-bs-placement="bottom" title="search latlng" class="btn icon btn-outline-primary"> <i class="fa fa-search"></i></a>
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td>Longitude</td>
-                                    <td colspan="2"><input type="text" class="form-control" id="longitude" name="longitude" autocomplete="off" readonly="readonly" required></td>
+                                    <td colspan="2"><input type="text" class="form-control" id="longitude" name="longitude" autocomplete="off" required></td>
                                 </tr>
                             </tbody>
                         </table>

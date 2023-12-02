@@ -38,11 +38,13 @@
                                         <input type="text" class="form-control" name="name" value="<?= $objectData->name; ?>" required>
                                     </div>
                                 </div>
-                                <div class="form-group">
-                                    <label for="category" class="col col-form-label">Category</label>
-                                    <div class="col">
-                                        <input type="text" class="form-control" name="category" value="<?= $objectData->category; ?>">
-                                    </div>
+                                <!-- category -->
+                                <div class="form-group mb-4">
+                                    <label for="category" class="mb-2">Category </label>
+                                    <select class="form-select" name="category">
+                                        <option <?= $objectData->category == 'Musholla' ? 'selected' : '' ?>>Musholla</option>
+                                        <option <?= $objectData->category == 'Mesjid' ? 'selected' : '' ?>>Mesjid</option>
+                                    </select>
                                 </div>
                                 <div class="form-group">
                                     <label for="building_size" class="col col-form-label">Building size</label>
@@ -108,11 +110,14 @@
                                 </tr>
                                 <tr>
                                     <td>Latitude</td>
-                                    <td colspan="2"><input type="text" class="form-control" id="latitude" name="latitude" value="<?= $objectData->lat; ?>" autocomplete="off" readonly="readonly" required></td>
+                                    <td colspan="2"><input type="text" class="form-control" id="latitude" name="latitude" value="<?= $objectData->lat; ?>" autocomplete="off" required></td>
+                                    <td>
+                                        <a onclick="searchLatLang('<?= $url ?>')" data-bs-toggle="tooltip" data-bs-placement="bottom" title="search latlng" class="btn icon btn-outline-primary"> <i class="fa fa-search"></i></a>
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td>Longitude</td>
-                                    <td colspan="2"><input type="text" class="form-control" id="longitude" name="longitude" value="<?= $objectData->lng; ?>" autocomplete="off" readonly="readonly" required></td>
+                                    <td colspan="2"><input type="text" class="form-control" id="longitude" name="longitude" value="<?= $objectData->lng; ?>" autocomplete="off" required></td>
                                 </tr>
                                 <tr>
                                     <td>

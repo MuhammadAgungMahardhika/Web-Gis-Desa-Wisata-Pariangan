@@ -4,7 +4,7 @@ namespace App\Controllers;
 
 use Myth\Auth\Password;
 use CodeIgniter\Files\File;
-
+use CodeIgniter\I18n\Time;
 
 class User extends BaseController
 {
@@ -20,6 +20,11 @@ class User extends BaseController
         $this->reservationStatusModel = new \App\Models\reservationStatusModel();
         $this->validation =  \Config\Services::validation();
         $this->config = config('Auth');
+    }
+    public function getUser($id)
+    {
+        $userData = $this->model->getUser($id);
+        return json_encode($userData);
     }
     public function profile()
     {
@@ -38,8 +43,33 @@ class User extends BaseController
         $no = 0;
         // reservation status dan paket
         foreach ($users_reservation as $item) {
-            $reservation_status_id = $item['id_reservation_status'];
             $package_id = $item['id_package'];
+            $request_date = $item['request_date'];
+            $reservation_status = $item['id_reservation_status'];
+            $deposit_date = $item['deposit_date'];
+            //check if date is passed
+            $dateNow = date('Y-m-d');
+
+            $dateConvert = getDate(strtotime($request_date));
+            $yearConvert = $dateConvert['year'];
+            $monthConvert = $dateConvert['mon'];
+
+            $dayConvert = $dateConvert['mday'] - 3;
+            $requestDateMin3 = $yearConvert . "-" . $monthConvert . "-" . $dayConvert;
+
+            if ($dateNow == $requestDateMin3 && ($reservation_status == 2 || $reservation_status == 1) && $deposit_date == null) {
+                // update status
+                $users_reservation[$no]['id_reservation_status'] = 3;
+                $this->reservationModel->update_r_api($id, $package_id, $request_date, ['id_reservation_status' => 3]);
+            }
+
+            if ($request_date  < $dateNow && $reservation_status != 3) {
+                // update status
+                $users_reservation[$no]['id_reservation_status'] = 5;
+                $this->reservationModel->update_r_api($id, $package_id, $request_date, ['id_reservation_status' => 5]);
+            }
+            $reservation_status_id = $users_reservation[$no]['id_reservation_status'];
+
             $reservationStatus = $this->reservationStatusModel->get_s_by_id_api($reservation_status_id)->getRowArray();
             $package = $this->packageModel->getPackage($package_id)->getRowArray();
             $users_reservation[$no]['status'] = $reservationStatus['status'];
@@ -112,17 +142,17 @@ class User extends BaseController
         if ($validateInput) {
             // -----------------------------Avatar -----------------------------------------
 
-            if ($request['avatar'] != 'default.png' && $request['avatar']) {
-                $folder = $request['avatar'];
-                $filepath = WRITEPATH . 'uploads/' . $folder;
-                $filenames = get_filenames($filepath);
-                $avatar = new File($filepath . '/' . $filenames[0]);
-                $avatar->move(FCPATH . 'assets/images/user-photos');
-                $requestData['user_image'] = $avatar->getFilename();
-                delete_files($filepath);
-                rmdir($filepath);
-            } else {
-                $requestData['user_image'] = 'default.png';
+            if (isset($request['avatar'])) {
+                if ($request['avatar'] != 'default.svg') {
+                    $folder = $request['avatar'];
+                    $filepath = WRITEPATH . 'uploads/' . $folder;
+                    $filenames = get_filenames($filepath);
+                    $avatar = new File($filepath . '/' . $filenames[0]);
+                    $avatar->move(FCPATH . 'assets/images/user-photos');
+                    $requestData['user_image'] = $avatar->getFilename();
+                    delete_files($filepath);
+                    rmdir($filepath);
+                }
             }
 
 

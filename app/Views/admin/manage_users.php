@@ -5,21 +5,34 @@
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="<?= base_url('dashboard') ?>">Dashboard</a></li>
-            <li class="breadcrumb-item active" aria-current="page">List admin</li>
+            <li class="breadcrumb-item active" aria-current="page">List <?= $listTitle; ?></li>
         </ol>
     </nav>
     <div class="card shadow mb-4">
         <div class="card-header py-3">
-            <h5 class="m-0 font-weight-bold text-primary text-center">List Admin</h5>
+            <h5 class="m-0 font-weight-bold text-primary text-center">List <?= $listTitle; ?></h5>
             <a href="<?= base_url('manage_users/insert') ?> " title="Add new admin" role="button" class="btn btn-success btn-sm"><i class="fa fa-plus"></i> Add</a>
+            <!-- role -->
+            <div class="btn-group btn-sm">
+                <div class="dropdown">
+                    <button class="btn btn-primary dropdown-toggle me-1 btn-sm" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Role
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        <a class="dropdown-item" href="<?= base_url('manage_users/index') ?>">Users</a>
+                        <a class="dropdown-item" href="<?= base_url('manage_users/admin') ?>">Admin</a>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <table class="table table-border" id="dataTable" width="100%" cellspacing="0">
                     <thead>
                         <?php $no = 1; ?>
                         <tr>
                             <th>No</th>
+                            <th>Role</th>
                             <th>Email</th>
                             <th>Username</th>
                             <th>Fullname</th>
@@ -34,6 +47,7 @@
                         <?php foreach ($users as $user) : ?>
                             <tr>
                                 <td><?= $no++; ?></td>
+                                <td><?= $user->role; ?></td>
                                 <td><?= $user->email; ?></td>
                                 <td><?= $user->username; ?></td>
                                 <td><?= $user->fullname; ?></td>
@@ -76,4 +90,9 @@
 </div>
 <!-- /.container-fluid -->
 
+<?= $this->endSection() ?>
+<?= $this->section('script') ?>
+<script>
+    new DataTable("#dataTable")
+</script>
 <?= $this->endSection() ?>

@@ -10,7 +10,7 @@ class homestayModel extends Model
 {
     protected $table = 'homestay';
     protected $table_gallery = 'homestay_gallery';
-    protected $columns = 'id,name,area_size,open,close,description';
+    protected $columns = 'homestay.id,homestay.name,homestay.area_size,homestay.open,homestay.close,homestay.price,homestay.description';
     protected $coords = "ST_Y(ST_Centroid(homestay.geom)) AS lat ,ST_X(ST_Centroid(homestay.geom)) AS lng ";
     protected $geom_area = "ST_AsGeoJSON(homestay.geom_area) AS geoJSON";
 
@@ -19,7 +19,7 @@ class homestayModel extends Model
         $lastId = $this->db->table($this->table)->select('id')->orderBy('id', 'ASC')->get()->getLastRow('array');
         if ($lastId != null) {
             $count = (int)substr($lastId['id'], 0);
-            $id = sprintf('%02d', $count + 1);
+            $id = sprintf('%01d', $count + 1);
             return $id;
         } else {
             return '01';

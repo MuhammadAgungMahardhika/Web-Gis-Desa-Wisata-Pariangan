@@ -66,6 +66,7 @@ class ManageHomestayController extends BaseController
         $request = $this->request->getPost();
         $updateRequest = [
             'name' => $this->request->getPost('name'),
+            'price' => $this->request->getPost('price'),
             'area_size' => $this->request->getPost('area_size'),
             'open' => $this->request->getPost('open'),
             'close' => $this->request->getPost('close'),
@@ -138,6 +139,7 @@ class ManageHomestayController extends BaseController
         $insertRequest = [
             'id' => $id,
             'name' => $this->request->getPost('name'),
+            'price' => $this->request->getPost('price'),
             'area_size' => $this->request->getPost('area_size'),
             'open' => $this->request->getPost('open'),
             'close' => $this->request->getPost('close'),

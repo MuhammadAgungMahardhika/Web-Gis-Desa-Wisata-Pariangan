@@ -18,6 +18,20 @@ class usersModel extends Model
             ->join('auth_groups_users', 'auth_groups_users.user_id = users.id')
             ->join('auth_groups', 'auth_groups.id = auth_groups_users.group_id')
             ->where('users.id !=', $user_id)
+            ->where('auth_groups.id', 2)
+            ->get()->getResult();
+
+        return $query;
+    }
+    public function getAdmins()
+    {
+        $user_id = user()->id;
+        $query = $this->db->table('users', 'users.id')
+            ->select("{$this->columns}")
+            ->join('auth_groups_users', 'auth_groups_users.user_id = users.id')
+            ->join('auth_groups', 'auth_groups.id = auth_groups_users.group_id')
+            ->where('users.id !=', $user_id)
+            ->where('auth_groups.id', 1)
             ->get()->getResult();
 
         return $query;

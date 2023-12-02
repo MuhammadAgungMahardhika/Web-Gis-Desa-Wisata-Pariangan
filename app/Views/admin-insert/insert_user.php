@@ -20,7 +20,7 @@
                     <div class="col-md">
                         <div class="card-header py-3">
                             <a href="<?= base_url('manage_users'); ?>" role="button" class="btn btn-primary justify-item-center" title="Back to list admin"><i class="fa fa-arrow-left"></i></a>
-                            <h6 class="m-0 font-weight-bold text-primary text-center">Add New Admin</h6>
+                            <h6 class="m-0 font-weight-bold text-primary text-center">Add New Users</h6>
                             <!-- display flash data message -->
                         </div>
                         <div class="card-body">

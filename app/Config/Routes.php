@@ -58,6 +58,7 @@ $routes->get('/register', 'AuthController::register');
 // Route user menu
 // Route untuk manage user profile
 $routes->group('user', function ($routes) {
+    $routes->get('getUser/(:segment)', 'User::getUser/$1', ['filter' => 'role:user,admin']);
     $routes->get('profile', 'User::profile', ['filter' => 'role:user,admin']);
     $routes->get('edit_profile', 'User::edit_profile', ['filter' => 'role:user,admin']);
     $routes->get('reservation/(:segment)', 'User::reservation/$1', ['filter' => 'role:user']);
@@ -133,15 +134,18 @@ $routes->group('review', function ($routes) {
     $routes->post('event', 'RatingReviewController::rating_event');
     $routes->post('comment_event', 'RatingReviewController::comment_event');
     $routes->get('get_event_comment', 'RatingReviewController::get_event_comment');
-    $routes->post('package', 'RatingReviewController::rating_package');
-    $routes->post('comment_package', 'RatingReviewController::comment_package');
-    $routes->get('get_package_comment', 'RatingReviewController::get_package_comment');
+    $routes->post('package', 'RatingReviewController::rating_comment_package');
 });
 
 // Menu package
 $routes->group('package', function ($routes) {
     $routes->get('/', 'packageController::packages');
+    $routes->get('costum/new', 'packageController::newCostume');
+    $routes->get('package_api/(:segment)', 'packageController::package_api/$1');
+    $routes->post('saveCostume', 'packageController::saveCostume', ['filter' => 'role:user']);
     $routes->get('detail/(:segment)', 'packageController::package/$1');
+    $routes->get('costumExisting/(:segment)', 'packageController::costumExisting/$1');
+    $routes->post('saveCostumExisting', 'packageController::saveCostumExisting');
     $routes->get('getActivityGallery/(:segment)', 'packageController::getActivityGallery/$1');
     $routes->get('objects/package_day/(:segment)', 'packageController::getObjectsByPackageDayId/$1');
 });
@@ -162,6 +166,7 @@ $routes->get('dashboard', 'Pages::dashboard', ['filter' => 'role:admin']);
 $routes->group('manage_users', function ($routes) {
     $routes->get('/', 'ManageUsersController::index', ['filter' => 'role:admin']);
     $routes->get('index', 'ManageUsersController::index', ['filter' => 'role:admin']);
+    $routes->get('admin', 'ManageUsersController::admin', ['filter' => 'role:admin']);
     $routes->get('detail/(:num)', 'ManageUsersController::detail/$1',  ['filter' => 'role:admin']);
     $routes->get('edit/(:num)', 'ManageUsersController::edit/$1',  ['filter' => 'role:admin']);
     $routes->post('save_update/(:segment)', 'ManageUsersController::save_update/$1', ['filter' => 'role:user,admin']);
@@ -307,20 +312,27 @@ $routes->group('manage_service', function ($routes) {
 
 // 13. menu  reservation
 $routes->group('reservation', function ($routes) {
-    $routes->get('/', 'ReservationController::index', ['filter' => 'role:user']);
-    $routes->get('index', 'ReservationController::index', ['filter' => 'role:user']);
+    $routes->get('show/(:segment)/(:segment)/(:segment)', 'ReservationController::show/$1/$2/$3', ['filter' => 'role:user,admin']);
     $routes->post('create', 'ReservationController::create', ['filter' => 'role:user,admin']);
-    $routes->delete('delete/(:segment)', 'ReservationController::delete/$1', ['filter' => 'role:user,admin']);
-    $routes->get('check/(:segment)/(:segment)', 'ReservationController::check/$1/$2', ['filter' => 'role:user,admin']);
+    $routes->put('update/(:segment)/(:segment)/(:segment)', 'ReservationController::update/$1/$2/$3', ['filter' => 'role:user,admin']);
+    $routes->delete('delete/(:segment)/(:segment)/(:segment)', 'ReservationController::delete/$1/$2/$3', ['filter' => 'role:user,admin']);
+    $routes->get('check/(:segment)/(:segment)/(:segment)', 'ReservationController::check/$1/$2/$3', ['filter' => 'role:user,admin']);
 });
 
 // 14. Manage reservation
 $routes->group('manage_reservation', function ($routes) {
     $routes->get('/', 'ManageReservationController::index', ['filter' => 'role:admin']);
     $routes->get('index', 'ManageReservationController::index', ['filter' => 'role:admin']);
-    $routes->patch('save_update/(:segment)', 'ManageReservationController::save_update/$1', ['filter' => 'role:admin']);
-    $routes->get('insert', 'ManageReservationController::insert', ['filter' => 'role:admin']);
-    $routes->post('save_insert', 'ManageReservationController::save_insert', ['filter' => 'role:admin']);
+    $routes->patch('save_update/(:segment)/(:segment)/(:segment)', 'ManageReservationController::save_update/$1/$2/$3', ['filter' => 'role:admin']);
+});
+
+// 14. Manage reservation
+$routes->group('pdf', function ($routes) {
+    $routes->get('/(:segment)', 'PdfGenerator::index/$1', ['filter' => 'role:user,admin']);
+    $routes->post('invoice-data', 'PdfGenerator::getInvoiceData', ['filter' => 'role:user,admin']);
+    $routes->get('invoice/(:segment)', 'PdfGenerator::invoice/$1', ['filter' => 'role:user,admin']);
+    $routes->post('ticket-data', 'PdfGenerator::getTicketData', ['filter' => 'role:user,admin']);
+    $routes->get('ticket/(:segment)', 'PdfGenerator::ticket/$1', ['filter' => 'role:user,admin']);
 });
 
 // Mobile route

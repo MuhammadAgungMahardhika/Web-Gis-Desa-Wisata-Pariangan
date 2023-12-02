@@ -7,7 +7,7 @@ use CodeIgniter\Files\File;
 class ManagePackageController extends BaseController
 {
     protected $model, $modelservices, $modelPariangan,  $modelFp, $validation, $helpers = ['auth', 'url', 'filesystem'];
-    protected $atractionModel, $culinaryModel, $worshipModel, $souvenirModel, $packageDayModel, $detailPackageModel;
+    protected $atractionModel, $culinaryModel, $worshipModel, $souvenirModel, $homestayModel, $packageDayModel, $detailPackageModel;
     protected $serviceModel, $detailServicePackageModel;
     protected $modelRating;
     protected $title = 'Manage-Packages | Tourism Village';
@@ -23,13 +23,14 @@ class ManagePackageController extends BaseController
         $this->culinaryModel = new \App\Models\culinaryPlaceModel();
         $this->worshipModel = new \App\Models\worshipPlaceModel();
         $this->souvenirModel = new \App\Models\souvenirPlaceModel();
+        $this->homestayModel = new \App\Models\homestayModel();
         $this->modelservices = new \App\Models\serviceModel();
         $this->modelFp = new \App\Models\facilityPackageModel();
         $this->modelRating  =  new \App\Models\ratingModel();
     }
     public function index()
     {
-        $objectData = $this->model->getPackages();
+        $objectData = $this->model->getPackages('costume');
         $data = [
             'title' => $this->title,
             'objectData' => $objectData
@@ -72,14 +73,21 @@ class ManagePackageController extends BaseController
     {
         // 
         $package = $this->model->getPackage($id)->getRowArray();
-        // $homestayData = $this->HomestayModel->get_list_hm_api()->getResultArray();
+
         $serviceData = $this->modelservices->getServices()->getResultArray();
 
+        // get include service package
         $packageService = $this->detailServicePackageModel->get_service_by_package_api($id)->getResultArray();
-
         $selectedService = array();
         foreach ($packageService as $service) {
             $selectedService[] = $service['name'];
+        }
+
+        // get exclude service package
+        $packageServiceExclude = $this->detailServicePackageModel->get_service_by_package_api_exclude($id)->getResultArray();
+        $selectedServiceExclude = array();
+        foreach ($packageServiceExclude as $service) {
+            $selectedServiceExclude[] = $service['name'];
         }
 
         $packageDay = $this->packageDayModel->get_pd_by_package_id_api($id)->getResultArray();
@@ -95,26 +103,37 @@ class ManagePackageController extends BaseController
         $atractionData = $this->atractionModel->getAtractions();
         foreach ($atractionData as $atraction) {
             $atraction->id = 'A' . $atraction->id;
+            $atraction->geoJSON = null;
             $objectData[] = $atraction;
         }
         $culinaryData = $this->culinaryModel->getCulinaryPlaces();
         foreach ($culinaryData as $culinary) {
             $culinary->id = 'C' . $culinary->id;
+            $culinary->geoJSON = null;
             $objectData[] = $culinary;
         }
         $souvenirData = $this->souvenirModel->getSouvenirPlaces();
         foreach ($souvenirData as $souvenir) {
             $souvenir->id = 'S' . $souvenir->id;
+            $souvenir->geoJSON = null;
             $objectData[] = $souvenir;
         }
         $worshipData = $this->worshipModel->getWorshipPlaces();
         foreach ($worshipData as $worship) {
-            $worship->id = 'S' . $worship->id;
+            $worship->id = 'W' . $worship->id;
+            $worship->geoJSON = null;
             $objectData[] = $worship;
+        }
+        $homestayData = $this->homestayModel->getHomestays();
+        foreach ($homestayData as $homestay) {
+            $homestay->id = 'H' . $homestay->id;
+            $homestay->geoJSON = null;
+            $objectData[] = $homestay;
         }
 
 
         $package['service_package'] =  $selectedService;
+        $package['service_package_exclude'] = $selectedServiceExclude;
         $package['gallery'] = [$package['url']];
         $package['video_url'] = null;
 
@@ -133,20 +152,21 @@ class ManagePackageController extends BaseController
     {
         // 
         $request = $this->request->getPost();
+
         $url = null;
         if (isset($request['gallery'])) {
             $folder = $request['gallery'][0];
             $filepath = WRITEPATH . 'uploads/' . $folder;
             $filename = get_filenames($filepath)[0];
             $fileImg = new File($filepath . '/' . $filename);
-            $fileImg->move(FCPATH . 'media/photos');
+            $fileImg->move(FCPATH . 'media/photos/package');
             delete_files($filepath);
             rmdir($filepath);
             $url = $fileImg->getFilename();
         }
         $requestData = [
             'name' => $request['name'],
-            // 'id_homestay' => $request['id_homestay'],
+            'date' => empty($request['date']) ? null : $request['date'],
             'price' => empty($request['price']) ? "0" : $request['price'],
             'capacity' => $request['capacity'],
             'cp' => $request['cp'],
@@ -188,14 +208,21 @@ class ManagePackageController extends BaseController
             }
         }
 
+        // service include
         $addService = true;
 
         if (isset($request['service_package'])) {
             $services = $request['service_package'];
-            $addService = $this->detailServicePackageModel->update_service_api($id, $services);
+            $addService = $this->detailServicePackageModel->update_service_api($id, $services, 'include');
+        }
+        // service include
+        $addServiceExclude = true;
+        if (isset($request['service_package_exclude'])) {
+            $servicesExclude = $request['service_package_exclude'];
+            $addServiceExclude = $this->detailServicePackageModel->update_service_api($id, $servicesExclude, 'exclude');
         }
 
-        if ($updateTp && $addService) {
+        if ($updateTp && $addService && $addServiceExclude) {
             return redirect()->to(base_url('manage_package'));
         } else {
             return redirect()->back()->withInput();
@@ -206,7 +233,7 @@ class ManagePackageController extends BaseController
     }
     public function insert()
     {
-        // $homestayData = $this->HomestayModel->get_list_hm_api()->getResultArray();
+
         $serviceData = $this->modelservices->getServices()->getResultArray();
         $objectData = [];
 
@@ -214,24 +241,33 @@ class ManagePackageController extends BaseController
         $atractionData = $this->atractionModel->getAtractions();
         foreach ($atractionData as $atraction) {
             $atraction->id = 'A' . $atraction->id;
+            $atraction->geoJSON = null;
             $objectData[] = $atraction;
         }
         $culinaryData = $this->culinaryModel->getCulinaryPlaces();
         foreach ($culinaryData as $culinary) {
             $culinary->id = 'C' . $culinary->id;
+            $culinary->geoJSON = null;
             $objectData[] = $culinary;
         }
         $souvenirData = $this->souvenirModel->getSouvenirPlaces();
         foreach ($souvenirData as $souvenir) {
             $souvenir->id = 'S' . $souvenir->id;
+            $souvenir->geoJSON = null;
             $objectData[] = $souvenir;
         }
         $worshipData = $this->worshipModel->getWorshipPlaces();
         foreach ($worshipData as $worship) {
-            $worship->id = 'S' . $worship->id;
+            $worship->id = 'W' . $worship->id;
+            $worship->geoJSON = null;
             $objectData[] = $worship;
         }
-
+        $homestayData = $this->homestayModel->getHomestays();
+        foreach ($homestayData as $homestay) {
+            $homestay->id = 'H' . $homestay->id;
+            $homestay->geoJSON = null;
+            $objectData[] = $homestay;
+        }
 
         $data = [
             'title' => $this->title,
@@ -248,7 +284,6 @@ class ManagePackageController extends BaseController
         // ---------------------Data request------------------------------------
         $request = $this->request->getPost();
 
-
         $id_package = $this->model->get_new_id();
 
         $url = null;
@@ -257,7 +292,7 @@ class ManagePackageController extends BaseController
             $filepath = WRITEPATH . 'uploads/' . $folder;
             $filename = get_filenames($filepath)[0];
             $fileImg = new File($filepath . '/' . $filename);
-            $fileImg->move(FCPATH . 'media/photos');
+            $fileImg->move(FCPATH . 'media/photos/package');
             delete_files($filepath);
             rmdir($filepath);
             $url = $fileImg->getFilename();
@@ -266,14 +301,14 @@ class ManagePackageController extends BaseController
         $requestData = [
             'id' => $id_package,
             'name' => $request['name'],
-            // 'id_homestay' => $request['id_homestay'],
+            'date' => empty($request['date']) ? null : $request['date'],
             'price' => empty($request['price']) ? "0" : $request['price'],
             'capacity' => $request['capacity'],
             'cp' => $request['cp'],
             'url' => $url,
             'description' => $request['description'],
         ];
-
+        // dd($requestData);
 
         $addtp = $this->model->addPackage($requestData);
         if (isset($request['packageDetailData'])) {
@@ -303,19 +338,28 @@ class ManagePackageController extends BaseController
             }
         }
 
+        // service include
         $addService = true;
         if (isset($request['service_package'])) {
             $services = $request['service_package'];
-            $addService = $this->detailServicePackageModel->add_service_api($id_package, $services);
+            $addService = $this->detailServicePackageModel->add_service_api($id_package, $services, 'include');
+        }
+
+        // service exclude
+        $addServiceExclude = true;
+        if (isset($request['service_package_exclude'])) {
+            $servicesExclude = $request['service_package_exclude'];
+            $addServiceExclude = $this->detailServicePackageModel->add_service_api($id_package, $servicesExclude, 'exclude');
         }
 
 
-        if ($addtp && $addService) {
+        if ($addtp && $addService && $addServiceExclude) {
             return redirect()->to(base_url('manage_package'));
         } else {
             return redirect()->back()->withInput();
         }
     }
+
 
     public function delete($id)
     {

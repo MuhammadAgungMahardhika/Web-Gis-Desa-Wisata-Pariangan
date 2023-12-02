@@ -100,6 +100,9 @@
                     <li class="nav-item">
                         <a class="nav-link text-secondary" href="#MyCertificates">AWARDS</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-success" href="/login">LOGIN</a>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -129,18 +132,18 @@
             </div>
             <div class=" col-md-6 p-4 ">
                 <img src="media/photos/landing-page/makam.jpg" alt="" style="max-width: 100%" class="efek1">
-                <figcaption class="figure-caption text-start">Kuburan Panjang Tantejo Gurhano ini memiliki nilai sejarah yang tinggi dalam sejarah Minangkabau, karena Tantejo Gurhano adalah arsitek Rumah Gadang pertama di Minangkabau. <a class="text-link text-success" href="<?= base_url('list_object'); ?>"> Selengkapnya</a></figcaption>
+                <figcaption class="figure-caption text-start">The Tantejo Gurhano Long Grave holds significant historical value in Minangkabau history because Tantejo Gurhano was the architect of the first Rumah Gadang (traditional Minangkabau house) in Minangkabau.<a class="text-link text-success" href="<?= base_url('list_object'); ?>"> more info</a></figcaption>
             </div>
 
         </div>
         <div class="row justify" style="padding-left: 75px;">
             <div class="col-md-5 my-5 ">
                 <img src="media/photos/landing-page/batulantaktigo.jpg" alt="" style="max-width: 100%;" class="efek5">
-                <figcaption class="figure-caption  text-start">Batu Lantak Tigo merupakan 3 buah batu berukuran besar dan berjarak cukup jauh sehingga membentuk sebuah tungku (perapian)<a class="text-link text-success" href="<?= base_url('list_object'); ?>"> Selengkapnya</a></figcaption>
+                <figcaption class="figure-caption  text-start">The Batu Lantak Tigo consists of three large stones spaced at a considerable distance, forming a hearth or fireplace.<a class="text-link text-success" href="<?= base_url('list_object'); ?>"> more info</a></figcaption>
             </div>
             <div class=" col-md-5 my-5 " style="margin-left: 120px;">
                 <img src="media/photos/landing-page/masjid.jpg" alt="" style="max-width: 100%" class="efek5">
-                <figcaption class="figure-caption text-start">Mesjid Ishlah ini konon katanya merupakan mesjid tertua di Minangkabau. Sudah direnovasi beberapa kali, namun secara umum bentuknya masih sama. Hanya terjadi perubahan material dan penambahan fungsi ruang. <a class="text-link text-success" href="<?= base_url('list_object'); ?>"> Selengkapnya</a></figcaption>
+                <figcaption class="figure-caption text-start">The Ishlah Mosque is purportedly the oldest mosque in Minangkabau. It has undergone several renovations, but its general structure remains the same. Changes have mainly involved the use of different materials and the addition of functional spaces. <a class="text-link text-success" href="<?= base_url('list_object'); ?>"> more info</a></figcaption>
             </div>
 
         </div>
@@ -192,7 +195,7 @@
                 <div class="col-lg-9 col-md-6">
                     <h5 class="text-light mb-4">Address</h5>
                     <p class="mb-2">
-                        <i class="fa fa-map-marker-alt me-3"></i>Nagari Tuo Pariangan, Kecamatan Pariangan, Kabupaten Tanah Datar, Provinsi Sumatera Barat
+                        <i class="fa fa-map-marker-alt me-3"></i>Nagari Tuo Pariangan, Pariangan Distric, Tanah Datar Regency, West Sumatera Province
                     </p>
                     <p class="mb-2">
                         <i class="fa fa-phone-alt me-3"></i>+62 822 1814 1289

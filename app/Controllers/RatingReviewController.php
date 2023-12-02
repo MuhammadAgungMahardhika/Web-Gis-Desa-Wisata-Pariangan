@@ -2,16 +2,18 @@
 
 namespace App\Controllers;
 
-use CodeIgniter\I18n\Time;
+
 
 class RatingReviewController extends BaseController
 {
     protected $modelReview;
     protected $modelComment;
+    protected $modelReservation;
     public function __construct()
     {
         $this->modelReview = new \App\Models\ratingModel();
         $this->modelComment = new \App\Models\reviewModel();
+        $this->modelReservation = new \App\Models\reservationModel();
     }
     public function rating_atraction()
     {
@@ -116,55 +118,27 @@ class RatingReviewController extends BaseController
         $comment = $this->modelComment->getObjectComment('event_id', $object_id)->getResult();
         return json_encode($comment);
     }
-    public function rating_package()
+    public function rating_comment_package()
     {
         $data = $this->request->getPOST();
-        $user_id = $this->request->getPOST('user_id');
-        $package_id = $this->request->getPOST('id_package');
+        $user_id = $data['id_user'];
+        $package_id = $data['id_package'];
+        $request_date = $data['request_date'];
+        $review = $data['review'];
+        $rating = $data['rating'];
+        // dd($data);
+        $requestData = [
+            'rating' =>  $rating,
+            'review' => $review
+        ];
 
-        if ($user_id && $package_id) {
-            $check = $this->modelReview->check($user_id, 'id_package', $package_id)->getRow();
-            // check rating alredy exist or not // if exist update // if not insert
-            if ($check) {
-                date_default_timezone_set('Asia/Jakarta');
-                $data['updated_date'] =  date('Y-m-d H:i:s');
-                $updateRating = $this->modelReview->updateAtractionRating($data, $user_id, 'id_package', $package_id);
-                if ($updateRating == true) {
-                    return json_encode($updateRating);
-                }
-            } else {
-                $addRating = $this->modelReview->addRating($data);
-                if ($addRating == true) {
-                    return json_encode($addRating);
-                }
-            }
-        }
-    }
-    public function comment_package()
-    {
-        $user_id = $this->request->getPOST('user_id');
-        $package_id = $this->request->getPOST('object_id');
-        $comment = $this->request->getPOST('comment');
-
-        $rating_id = $this->modelReview->getRatingId($user_id, 'id_package', $package_id)->getRow();
-
-        // Check if rating_id is there or not 
-        if ($rating_id != null) {
-            $updateComment = $this->modelComment->updateComment($user_id, $rating_id->rating, $comment);
-            return json_encode($updateComment);
+        $updateRating = $this->modelReservation->update_r_api($user_id, $package_id, $request_date, $requestData);
+        if ($updateRating) {
+            session()->setFlashdata('success', 'Thanks for your rated.');
+            return redirect()->to(site_url('user/reservation/' . $user_id));
         } else {
-            $addRating = $this->modelReview->addRating(['review_atraction.user_id' => $user_id, 'review_atraction.id_package' => $package_id]);
-            $rating_id = $this->modelReview->getRatingId($user_id, 'id_package', $package_id)->getRow();
-            if ($addRating) {
-                $addComment = $this->modelComment->addComment($user_id, $rating_id->rating, $comment);
-                return json_encode($addComment);
-            }
+            session()->setFlashdata('failed', 'Failed to rate, please try again');
+            return redirect()->to(site_url('user/reservation/' . $user_id));
         }
-    }
-    public function get_package_comment()
-    {
-        $object_id = $this->request->getVar('object_id');
-        $comment = $this->modelComment->getObjectComment('id_package', $object_id)->getResult();
-        return json_encode($comment);
     }
 }

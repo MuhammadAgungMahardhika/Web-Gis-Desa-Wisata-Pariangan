@@ -14,6 +14,7 @@ class ManageReservationController extends BaseController
     protected $title = 'Manage-Reservation | Tourism Village';
     public function __construct()
     {
+        $this->modelPariangan = new \App\Models\parianganModel();
         $this->validation = \Config\Services::validation();
         $this->model = new \App\Models\reservationModel();
         $this->reservationStatusModel = new \App\Models\reservationStatusModel();
@@ -32,9 +33,31 @@ class ManageReservationController extends BaseController
         $no = 0;
         // reservation status dan paket
         foreach ($contents as $item) {
-            $reservation_status_id = $item['id_reservation_status'];
             $package_id = $item['id_package'];
             $user_id = $item['id_user'];
+            $request_date = $item['request_date'];
+            $reservation_status = $item['id_reservation_status'];
+            $deposit_date = $item['deposit_date'];
+            //check if date is passed
+            $dateNow = date('Y-m-d');
+            $dateConvert = getDate(strtotime($request_date));
+            $yearConvert = $dateConvert['year'];
+            $monthConvert = $dateConvert['mon'];
+
+            $dayConvert = $dateConvert['mday'] - 3;
+            $requestDateMin3 = $yearConvert . "-" . $monthConvert . "-" . $dayConvert;
+
+            if ($dateNow == $requestDateMin3 && ($reservation_status == 2 || $reservation_status == 1) && $deposit_date == null) {
+                // update status
+                $contents[$no]['id_reservation_status'] = 3;
+                $this->model->update_r_api($user_id, $package_id, $request_date, ['id_reservation_status' => 3]);
+            }
+            if ($request_date < $dateNow && $reservation_status != 3) {
+                // update status
+                $contents[$no]['id_reservation_status'] = 4;
+                $this->model->update_r_api($user_id, $package_id, $request_date, ['id_reservation_status' => 4]);
+            }
+            $reservation_status_id = $contents[$no]['id_reservation_status'];
             $user = $this->userModel->get_u_by_id_api($user_id)->getRowArray();
             $reservationStatus = $this->reservationStatusModel->get_s_by_id_api($reservation_status_id)->getRowArray();
             $package = $this->packageModel->getPackage($package_id)->getRowArray();
@@ -43,11 +66,13 @@ class ManageReservationController extends BaseController
             $contents[$no]['package_name'] = $package['name'];
             $no++;
         }
+        $parianganData = $this->modelPariangan->getPariangan();
         $data = [
             'title' => $this->title,
-            'objectData' => $contents,
+            'data' => $contents,
             'userData' => $userData,
             'packageData' => $packageData,
+            'parianganData' => $parianganData,
             'statusData' => $statusData
         ];
 
@@ -77,7 +102,7 @@ class ManageReservationController extends BaseController
         return view('admin-edit/edit_product', $data);
     }
 
-    public function save_update($id = null)
+    public function save_update($id_user = null, $id_package = null, $request_date = null)
     {
         // ---------------------Data request-----------------------------
         $request = $this->request->getRawInput();
@@ -92,85 +117,11 @@ class ManageReservationController extends BaseController
                 unset($updateRequest[$key]);
             }
         }
-        $update =  $this->model->update_r_api($id, $updateRequest);
+        $update =  $this->model->update_r_api($id_user, $id_package, $request_date, $updateRequest);
         if ($update) {
             return json_encode($update);
         } else {
             return false;
-        }
-    }
-    public function insert()
-    {
-        $categoryData = $this->model->getCategory()->getResult();
-        $data = [
-            'title' => $this->title,
-            'categoryData' => $categoryData
-        ];
-        return view('admin-insert/insert_product', $data);
-    }
-    public function save_insert()
-    {
-        // ---------------------Data request------------------------------------
-        $request = $this->request->getPost();
-        $id = $this->model->get_new_id();
-
-        // ----------------Gallery-----------------------------------------
-
-        // check if gallery have empty string then make it become empty array
-        foreach ($request['gallery'] as $key => $value) {
-            if (!strlen($value)) {
-                unset($request['gallery'][$key]);
-            }
-        }
-        if ($request['gallery']) {
-            $folders = $request['gallery'];
-            foreach ($folders as $folder) {
-                $filepath = WRITEPATH . 'uploads/' . $folder;
-                $filenames = get_filenames($filepath);
-                $fileImg = new File($filepath . '/' . $filenames[0]);
-                $fileImg->move(FCPATH . 'media/photos/product');
-                delete_files($filepath);
-                rmdir($filepath);
-                $gallery = $fileImg->getFilename();
-            }
-        } else {
-            $gallery = '';
-        }
-
-        $insertRequest = [
-            'id' => $id,
-            'name' => $this->request->getPost('name'),
-            'product_category_id' => $this->request->getPost('category'),
-            'price' => $this->request->getPost('price'),
-            'brosur_url' => $gallery,
-            'description' => $this->request->getPost('description')
-        ];
-        // unset empty value
-        foreach ($insertRequest as $key => $value) {
-            if (empty($value)) {
-                unset($insertRequest[$key]);
-            }
-        }
-
-        $insert =  $this->model->addProduct($insertRequest);
-
-        if ($insert) {
-            session()->setFlashdata('success', 'Success! Data Added.');
-            return redirect()->to(site_url('manage_product'));
-        } else {
-            session()->setFlashdata('failed', 'Failed! Failed to add data.');
-            return redirect()->to(site_url('manage_product/insert'));
-        }
-    }
-    public function delete($id)
-    {
-        $delete =  $this->model->deleteProduct($id);
-        if ($delete) {
-            session()->setFlashdata('success', 'Success! product Deleted.');
-            return redirect()->to(site_url('manage_product'));
-        } else {
-            session()->setFlashdata('failed', 'Failed to delete product ');
-            return redirect()->to(site_url('manage_product'));
         }
     }
 }

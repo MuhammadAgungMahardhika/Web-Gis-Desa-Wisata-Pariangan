@@ -79,10 +79,12 @@
                             </div>
                         </div>
                     <?php else : ?>
+
                         <a class="btn btn-primary" href="<?= base_url('login') ?>">
                             <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
                             Login
                         </a>
+
                     <?php endif; ?>
                 </div>
             </div>

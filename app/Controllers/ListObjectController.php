@@ -288,7 +288,7 @@ class ListObjectController extends BaseController
         $wp = $_GET['wp'];
         $sp = $_GET['sp'];
         $f =  $_GET['f'];
-        $h = $_GET['h'];
+        $h =  $_GET['h'];
 
         $lat = $_GET['lat'];
         $lng = $_GET['lng'];

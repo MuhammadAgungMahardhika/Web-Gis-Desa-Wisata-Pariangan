@@ -52,6 +52,10 @@
                                 <label for="name" class="mb-2">Tourism Package Name <span class="text-danger">*</span></label>
                                 <input type="text" id="name" class="form-control" name="name" placeholder="Tourism Package Name" value="" required>
                             </div>
+                            <div class="form-group mb-4">
+                                <label for="date" class="mb-2">Date <span>( optional )</span></label>
+                                <input type="date" id="date" class="form-control" name="date" placeholder="date" value="null">
+                            </div>
                             <?php if (isset($homestayData)) : ?>
                                 <fieldset class="form-group mb-4">
                                     <label for="id_homestay" class="mb-2">Homestay</label>
@@ -85,14 +89,24 @@
                                 <label for="contact_person" class="mb-2">Contact Person</label>
                                 <input type="tel" id="contact_person" class="form-control" name="cp" placeholder="Contact Person" value="">
                             </div>
-
+                            <!-- service package include -->
                             <div class="form-group mb-4">
-                                <label for="service_package" class="mb-2">Service Package</label>
+                                <label for="service_package" class="mb-2">Service Package (include)</label>
                                 <select class="choices form-select multiple-remove" multiple="multiple" id="service_package" name="service_package[]">
                                     <?php foreach ($serviceData as $service) : ?>
 
                                         <option value="<?= esc($service['id']); ?>"><?= esc($service['name']); ?></option>
 
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+
+                            <!-- service package exclude -->
+                            <div class="form-group mb-4">
+                                <label for="service_package_exclude" class="mb-2">Service Package (exclude) </label>
+                                <select class="choices form-select multiple-remove" multiple="multiple" id="service_package_exclude" name="service_package_exclude[]">
+                                    <?php foreach ($serviceData as $service) : ?>
+                                        <option value="<?= esc($service['id']); ?>"><?= esc($service['name']); ?></option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
@@ -115,6 +129,7 @@
                     <div class="card">
                         <div class="card-header">
                             <h4 class="card-title text-center">Detail package</h4>
+                            <input type="hidden" required id="checkDetailPackage">
                         </div>
                         <div class="card-body">
                             <button type="button" onclick="openPackageDayModal(`${noDay}`)" class="btn btn-outline-primary block" data-bs-toggle="modal" data-bs-target="#modalPackage"> New package day
@@ -182,6 +197,15 @@
 <script src="https://unpkg.com/filepond@^4/dist/filepond.js"></script>
 <script src="<?= base_url('assets/js/extensions/form-element-select.js'); ?>"></script>
 <script>
+    function checkRequired(event) {
+        let checkDetailPackage = $('#checkDetailPackage').val()
+
+        if (!checkDetailPackage) {
+            event.preventDefault();
+            Swal.fire('You dont have any activities, please add 1 at least', '', 'warning');
+        }
+    }
+
     function removeObject(noDay, noDetail) {
         console.log("masuk sini")
         $(`#${noDay}-${noDetail}`).remove()
@@ -251,28 +275,28 @@
         <input type="text" id="detail-package-day" class="form-control" name="detail-package-day" value="${noDay}" readonly placeholder="object" required>
        
         <div class="form-group mb-4">
-                    <label for="detail-package-id-object" class="mb-2">Object</label>
-                    <select class="form-select" id="detail-package-id-object" name="detail-package-id-object">
+                    <label for="select-object" class="mb-2">Object</label>
+                    <select class="form-select" onchange="addObjectValue(this.value)" required>
+                                     <option >Pilih objek</option>
                                     <?php if ($objectData) : ?>
                                         <?php $no = 0; ?>       
                                         <?php foreach ($objectData as $object) : ?>
-                                           
-                                    <option value="<?= esc($object->id); ?>" <?= ($no == 0) ? 'selected' : ''; ?>> <?= $object->id ?> - <?= esc($object->name); ?></option>
+                                            
+                                    <option value="<?= esc(json_encode($object)) ?>"> <?= $object->id ?> - <?= esc($object->name); ?></option>
                                         
                                             <?php $no++; ?>       
                                         <?php endforeach; ?>
                                     <?php else : ?>
-                                        <option value=" ">Homestay not found</option>
+                                       
                                     <?php endif; ?>
                      </select>
         </div>
-        <div class="form-group mb-4">
-                    <label for="detail-package-activity-type" class="mb-2">Activity type</label>
-                    <input type="text" id="detail-package-activity-type" class="form-control" name="detail-package-activity-type" placeholder="activity type" required>
-        </div> 
+        <input id="detail-package-id-object" type="hidden" required>
+        <input id="detail-package-price-object" type="hidden" type="number" value="0" required>
+       
         <div class="form-group mb-4">
                     <label for="detail-package-description" class="mb-2">Description</label>
-                    <input type="text" id="detail-package-description" class="form-control" name="detail-package-description" placeholder="Detail package description" required>
+                    <input type="text" id="detail-package-description" class="form-control" name="detail-package-description" placeholder="Detail package description">
         </div>
         `)
         $("#modalFooter").html(
@@ -287,23 +311,49 @@
         )
     }
 
+    function addObjectValue(object) {
+
+        console.log(object)
+        let objectData = JSON.parse(object)
+        let objectId = objectData.id
+        let objectName = objectData.name
+        $("#detail-package-id-object").val(objectId)
+        $("#detail-package-description").val("Visit " + objectName)
+        let objectPrice = objectData.price == null ? 0 : parseInt(objectData.price)
+        $("#detail-package-price-object").val(objectPrice)
+    }
+
     function saveDetailPackageDay(noDay) {
         //get data from modal input
         let noDetail = parseInt($(`#lastNoDetail${noDay}`).val())
-        console.log(noDetail)
+
         let object_id = $("#detail-package-id-object").val()
-        let activity_type = $("#detail-package-activity-type").val()
+        let activity_type = ""
         let description = $("#detail-package-description").val()
 
+        if (object_id.substring(0, 1) == 'A') {
+            activity_type = 'Atraksi'
+        } else if (object_id.substring(0, 1) == 'C') {
+            activity_type = 'Culinary Place'
+        } else if (object_id.substring(0, 1) == 'S') {
+            activity_type = 'Souvenir Place'
+        } else if (object_id.substring(0, 1) == 'W') {
+            activity_type = 'Worship Place'
+        } else if (object_id.substring(0, 1) == 'H') {
+            activity_type = 'Homestay'
+        }
+        console.log(activity_type)
         $(`#body-detail-package-${noDay}`).append(`
         <tr id="${noDay}-${noDetail}"> 
           <td><input class="form-control" value="${object_id}" name="packageDetailData[${noDay}][detailPackage][${noDetail}][id_object]" required readonly></td>
-          <td><input class="form-control" value="${activity_type}" name="packageDetailData[${noDay}][detailPackage][${noDetail}][activity_type]"></td>
+          <td><input class="form-control" value="${activity_type}" name="packageDetailData[${noDay}][detailPackage][${noDetail}][activity_type]"
+          readonly></td>
           <td><input class="form-control" value="${description}" name="packageDetailData[${noDay}][detailPackage][${noDetail}][description]" required></td>
           <td><a class="btn btn-danger" onclick="removeObject('${noDay}','${ noDetail }')"> <i class="fa fa-x"></i> </a></td>
         </tr>     
         `)
         $(`#lastNoDetail${noDay}`).val(noDetail + 1)
+        $('#checkDetailPackage').val('oke')
     }
 </script>
 

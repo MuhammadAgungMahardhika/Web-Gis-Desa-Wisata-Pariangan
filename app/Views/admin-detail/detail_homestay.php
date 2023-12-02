@@ -28,6 +28,10 @@
                                         <td><?= $objectData->name; ?></td>
                                     </tr>
                                     <tr>
+                                        <td class="fw-bold">Price</td>
+                                        <td><?= $objectData->price; ?></td>
+                                    </tr>
+                                    <tr>
                                         <td class="fw-bold">Area size</td>
                                         <td><?= $objectData->area_size; ?></td>
                                     </tr>
